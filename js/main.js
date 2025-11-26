@@ -1,22 +1,13 @@
 let apiKey = "1e3e8f230b6064d27976e41163a82b77";
 
-navigator.geolocation.getCurrentPosition(async function (position) {
-   
+(async function () {
     try {
-        var lat = position.coords.latitude;
-        var lon = position.coords.longitude;
-        //longitude and  latitude are used to get city name
-        var map = await fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=5&appid=${apiKey}`)
-        var userdata = await map.json();
-        let loc = userdata[0].name;
-        //By using City name  we can get the weather details of that particular city from OpenWeatherMap API
-        let url = `https://api.openweathermap.org/data/2.5/forecast?&units=metric&`;
-        let respond = await fetch(url + `q=${loc}&` + `appid=${apiKey}`);
+        let loc = "Jalgaon";
+
+        let url = `https://api.openweathermap.org/data/2.5/forecast?&units=metric&q=${loc}&appid=${apiKey}`;
+        let respond = await fetch(url);
         let data = await respond.json();
 
-        console.log(data);
-        
-        // display current weather info
         let cityMain = document.getElementById("city-name");
         let cityTemp = document.getElementById("metric");
         let weatherMain = document.querySelectorAll("#weather-main");
@@ -50,37 +41,35 @@ navigator.geolocation.getCurrentPosition(async function (position) {
         } else if (weatherCondition === "clouds" || weatherCondition === "smoke") {
             weatherImg.src = "img/cloud.png";
             weatherImgs.src = "img/cloud.png";
-        } else if (weatherCondition === "mist" || weatherCondition === "Fog") {
+        } else if (weatherCondition === "mist" || weatherCondition === "fog") {
             weatherImg.src = "img/mist.png";
             weatherImgs.src = "img/mist.png";
         } else if (weatherCondition === "haze") {
             weatherImg.src = "img/haze.png";
             weatherImgs.src = "img/haze.png";
-        } else if (data.weather[0].main === "Thunderstorm") {
+        } else if (weatherCondition === "thunderstorm") {
             weatherImg.src = "img/thunderstorm.png";
             weatherImgs.src = "img/thunderstorm.png";
         }
 
-        // Fetch and display 5-day forecast data
         const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${data.city.name}&appid=${apiKey}&units=metric`;
 
         fetch(forecastUrl)
             .then(response => response.json())
             .then(data => {
-                console.log("5-Day Forecast for", data.city.name);
                 displayForecast(data);
             })
             .catch(error => {
-                console.error("Error fetching forecast:", error);
+                console.error(error);
             });
 
         function displayForecast(data) {
             const dailyForecasts = {};
-            let forecast = document.getElementById('future-forecast-box');
+            let forecast = document.getElementById("future-forecast-box");
             let forecastbox = "";
 
             data.list.forEach(item => {
-                const date = item.dt_txt.split(' ')[0];
+                const date = item.dt_txt.split(" ")[0];
                 let dayName = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
                 let day = new Date(date).getDay();
 
@@ -103,7 +92,7 @@ navigator.geolocation.getCurrentPosition(async function (position) {
                         break;
                     case "clear":
                     case "clear sky":
-                        imgSrc = "img/sun.png";9
+                        imgSrc = "img/sun.png";
                         break;
                     case "snow":
                         imgSrc = "img/snow.png";
@@ -127,9 +116,9 @@ navigator.geolocation.getCurrentPosition(async function (position) {
 
                 forecastbox += `
                 <div class="weather-forecast-box">
-                <div class="day-weather">
-                <span>${dailyForecasts[date].day_today}</span>
-                 </div>
+                    <div class="day-weather">
+                        <span>${dailyForecasts[date].day_today}</span>
+                    </div>
                     <div class="weather-icon-forecast">
                         <img src="${imgSrc}" />
                     </div>
@@ -141,14 +130,6 @@ navigator.geolocation.getCurrentPosition(async function (position) {
             }
 
             forecast.innerHTML = forecastbox;
-
-            console.log(data);
         }
-    } catch (error) {
-        console.error("An error occurred:", error);
-    }
-},
-() => {
-    // Handle location retrieval error
-    alert("Please turn on your location and refresh the page");
-  });
+    } catch (error) {}
+})();
